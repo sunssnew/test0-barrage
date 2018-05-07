@@ -1,0 +1,13 @@
+@charset "UTF-8";
+
+.fan-bullet{
+	position: relative;
+}
+
+.fan-bullet_area {
+	display: flex;
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	top: 0px;
+}

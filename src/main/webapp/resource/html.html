@@ -1,0 +1,247 @@
+<!DOCTYPE html>  
+<html>  
+<head>  
+  <meta http-equiv="content-type" content="text/html;charset=UTF-8"/>  
+  <title>input 操作光标在最后</title>  
+</head>  
+<body>  
+<div style=" margin: auto;width: 800px">  
+  <div>  
+    <input type="radio" name="radio" checked onclick="radioChange(event);" value="1">  
+    <input id="name" type="text" value="my name is Willian smith" style="width: 200px">  
+    <input type="radio" name="radio" onclick="radioChange(event);" value="2">  
+    <textarea id="content" style="width: 200px">my name is Willian smith</textarea>  
+  </div>  
+  <div>  
+  
+    <button onclick="focusFirstFun();">光标在最前面</button>  
+    <button onclick="focusEndFun();">光标在最后面</button>  
+    <button onclick="focusIndexFun();">光标在第二个字符之后</button>  
+  
+    <button onclick="focusPosFun();">光标位置</button>  
+    <button onclick="focusBeforeFun();">光标前移</button>  
+    <button onclick="focusNextFun();">光标后移</button>  
+	
+	<button onclick="focussss();">选</button> 
+  </div>  
+  
+  <div>  
+    <button onclick="focus5Fun();">选中前五个字符</button>  
+  
+  </div>  
+  <div>  
+    <p>光标位置：<span id="cursorLabel"></span></p>  
+  
+  </div>  
+</div>  
+  
+  
+<script type="text/javascript">  
+
+function focussss(){
+document.getElementById('content').focus();
+}
+
+var cursorLabel = document.getElementById('cursorLabel'),  
+        el = document.getElementById('name');  
+  
+//  el = document.getElementById('content');  
+  
+function radioChange(event) {  
+  var radio = event.target;  
+  if (radio.value == '1') {  
+    el = document.getElementById('name');  
+  } else if (radio.value == '2') {  
+    el = document.getElementById('content');  
+  }  
+}  
+  
+function focusFirstFun() {  
+  focusFirst(el);  
+}  
+  
+function focusEndFun() {  
+  focusEnd(el);  
+}  
+  
+function focusIndexFun() {  
+  focusIndex(el, 2)  
+}  
+  
+function focus5Fun() {  
+  focus(el, 0, 5);  
+}  
+  
+function focusPosFun() {  
+  cursorLabel.innerHTML = focusPos(el);  
+}  
+  
+function focusBeforeFun() {  
+  focusMove(el, -1);  
+}  
+  
+function focusNextFun() {  
+  focusMove(el, 1);  
+}  
+  
+/***************通用接口**********************/  
+  
+function focusFirst(el) {  
+  focus(el, 0, 0);  
+}  
+  
+function focusIndex(el, start) {  
+  focus(el, start);  
+}  
+  
+function focusEnd(el) {  
+  focus(el, el.value.length, el.value.length);  
+}  
+  
+function focus(el, start, index) {  
+  start = start === undefined ? 0 : start;  
+  index = index === undefined ? 0 : index;  
+  
+  if (el.createTextRange) {//IE浏览器  
+    var range = el.createTextRange();  
+    range.collapse(true);  
+    range.moveStart("character", start);  
+    range.moveEnd('character', index);  
+    range.select();  
+  } else {//非IE浏览器  
+    var end = index === 0 ? start : index;  
+    el.setSelectionRange(start, end);  
+    el.focus();  
+  }  
+}  
+  
+function focusMove(el, index) {  
+  if (el.createTextRange) {//IE浏览器  
+    el.focus();  
+    var range = document.selection.createRange();  
+    range.collapse(false);  
+    var tempRange = document.selection.createRange();  
+    if (el.tagName.toLowerCase() == 'textarea') {  
+      var pos = getCursorPosition(el);  
+  
+      if (pos.start <= 0) {  
+        index = 0;  
+      }  
+    } else { //input  
+      tempRange.setEndPoint("StartToStart", el.createTextRange());  
+      if (tempRange.text.length < 0) {  
+        index = 0;  
+      }  
+    }  
+  
+    range.move("character", index);  
+    range.select();  
+  
+  } else {//非IE浏览器  
+    var newPos = el.selectionStart + index;  
+    var start = end = newPos <= 0 ? 0 : newPos;  
+    el.setSelectionRange(start, end);  
+    el.focus();  
+  }  
+}  
+  
+  
+function focusPos(el) {  
+  var start = 0;  
+  if (el.createTextRange) {//IE浏览器  
+    el.focus();  
+    var range = document.selection.createRange();  
+    range.collapse(false);  
+    var tempRange = document.selection.createRange();  
+    if (el.tagName.toLowerCase() == 'textarea') {  
+      var pos = getCursorPosition(el);  
+      start = pos.start <= 0 ? 0 : pos.start;  
+  
+    } else { //input  
+      tempRange.setEndPoint("StartToStart", el.createTextRange());  
+      start = tempRange.text.length;  
+    }  
+  
+  
+  } else {//非IE浏览器  
+    start = el.selectionStart;  
+  }  
+  
+  if (window.console) {  
+    console.log(start);  
+  }  
+  
+  return start;  
+}  
+  
+  
+/**  
+ * getCursorPosition Method  
+ *  
+ * Created by Blank Zheng on 2010/11/12.  
+ * Copyright (c) 2010 PlanABC.net. All rights reserved.  
+ *  
+ * The copyrights embodied in the content of this file are licensed under the BSD (revised) open source license.  
+ */  
+function getCursorPosition(textarea) {  
+  var rangeData = {text: "", start: 0, end: 0 };  
+  textarea.focus();  
+  if (textarea.setSelectionRange) { // W3C  
+    rangeData.start = textarea.selectionStart;  
+    rangeData.end = textarea.selectionEnd;  
+    rangeData.text = (rangeData.start != rangeData.end) ? textarea.value.substring(rangeData.start, rangeData.end) : "";  
+  } else if (document.selection) { // IE  
+    var i,  
+            oS = document.selection.createRange(),  
+    // Don't: oR = textarea.createTextRange()  
+            oR = document.body.createTextRange();  
+    oR.moveToElementText(textarea);  
+  
+    rangeData.text = oS.text;  
+    rangeData.bookmark = oS.getBookmark();  
+  
+    // object.moveStart(sUnit [, iCount])  
+    // Return Value: Integer that returns the number of units moved.  
+    for (i = 0; oR.compareEndPoints('StartToStart', oS) < 0 && oS.moveStart("character", -1) !== 0; i++) {  
+      // Why? You can alert(textarea.value.length)  
+      if (textarea.value.charAt(i) == '\n') {  
+        i++;  
+      }  
+    }  
+    rangeData.start = i;  
+    rangeData.end = rangeData.text.length + rangeData.start;  
+  }  
+  
+  return rangeData;  
+}  
+/**  
+ * setCursorPosition Method  
+ *  
+ * Created by Blank Zheng on 2010/11/12.  
+ * Copyright (c) 2010 PlanABC.net. All rights reserved.  
+ *  
+ * The copyrights embodied in the content of this file are licensed under the BSD (revised) open source license.  
+ */  
+function setCursorPosition(textarea, rangeData) {  
+  if (!rangeData) {  
+    alert("You must get cursor position first.")  
+  }  
+  if (textarea.setSelectionRange) { // W3C  
+    textarea.focus();  
+    textarea.setSelectionRange(rangeData.start, rangeData.end);  
+  } else if (textarea.createTextRange) { // IE  
+    var oR = textarea.createTextRange();  
+    // Fixbug :  
+    // In IE, if cursor position at the end of textarea, the setCursorPosition function don't work  
+    if (textarea.value.length === rangeData.start) {  
+      oR.collapse(false)  
+      oR.select();  
+    } else {  
+      oR.moveToBookmark(rangeData.bookmark);  
+      oR.select();  
+    }  
+  }  
+}  
+</script>  
+</body>  
+</html>  
